@@ -1,5 +1,9 @@
 package udp;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -25,28 +29,32 @@ public class UDPClient
     private static DatagramPacket responsePacket;
     private static DatagramSocket clientSocket;
 
+    private static String filePath;
+
     public static void main(String[] args) throws IOException
     {
         clientSocket = new DatagramSocket();
         InetAddress serverIP = InetAddress.getByName(args[0]);
-        System.out.println(serverIP);
+        filePath = args[1];
 
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Type message: ");
-
-        while((message = scan.nextLine()) != null)
-        {
-            sendRequest(serverIP);
-            receiveResponse();
-        }
+        sendRequest(serverIP);
+        receiveResponse();
         clientSocket.close();
     }
 
     public static void sendRequest(InetAddress serverIP) throws IOException
     {
-        //clientSocket = new DatagramSocket();
-        dataOut = message.getBytes();
+        // Læs billed
+        BufferedImage bImage = ImageIO.read(new File(filePath));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        // Konverter til byteArray
+        ImageIO.write(bImage, "jpg", bos);
+        dataOut = bos.toByteArray();
+
+        // Send pakke
         requestPacket = new DatagramPacket(dataOut, dataOut.length, serverIP, serverPort);
+        System.out.println(dataOut.length);
         clientSocket.send(requestPacket);
     }
 

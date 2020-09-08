@@ -1,5 +1,9 @@
 package udp;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 
@@ -12,7 +16,7 @@ public class UDPServer
     private static final int serverPort = 7777;
 
     // buffers for the messages
-    private static byte[] dataIn = new byte[128];
+    private static byte[] dataIn = new byte[22000];
     private static byte[] dataOut = new byte[128];
 
     // In UDP messages are encapsulated in packages and sent over sockets
@@ -20,6 +24,7 @@ public class UDPServer
     private static DatagramPacket responsePacket;
     private static DatagramSocket serverSocket;
 
+    private static String imageDirectory = "C:\\stuff\\ducks\\duck.jpg";
 
     public static void main(String[] args) throws Exception
     {
@@ -32,10 +37,8 @@ public class UDPServer
             while(true)
             {
                 System.out.println("Server " + serverIP + " running ...");
-                messageIn = receiveRequest();
-                if (messageIn.equals("stop")) break;
-                messageOut = processRequest(messageIn);
-                sendResponse(messageOut);
+                receiveRequest();
+                sendResponse("Duck has been received!");
             }
         }
         catch(Exception e)
@@ -49,13 +52,14 @@ public class UDPServer
         }
     }
 
-    public static String receiveRequest() throws IOException
+    public static void receiveRequest() throws IOException
     {
         requestPacket = new DatagramPacket(dataIn, dataIn.length);
         serverSocket.receive(requestPacket);
-        String message = new String(requestPacket.getData(), 0, requestPacket.getLength());
-        System.out.println("Request: " + message);
-        return message;
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(requestPacket.getData());
+        BufferedImage bImage = ImageIO.read(bis);
+        ImageIO.write(bImage, "jpg", new File(imageDirectory));
     }
 
     public static String processRequest(String message)
